@@ -1,0 +1,86 @@
+-- 1. 각 년도에 개봉된 영화의 수
+-- 2. 평균 영화 상영 시간이 가장 높은 최신 10년
+-- 3. 21세기에 개봉한 영화의 평균 평점
+-- 4. 평균 영화 상영 시간이 가장 긴 감독
+-- 5. 가장 많은 영화를 작업한 다작 감독 상위 5명
+-- 6. 각 감독의 최고 평점과 최저 평점
+-- 7. 돈을 가장 많이 번 감독 (수익에서 예산을 뺀 금액 계산)
+-- 8. 2시간 이상인 영화들의 평균 평점
+-- 9. 가장 많은 영화가 개봉된 년도
+-- 10. 각 10년동안 평균 영화 상영 시간 (ex: 1800, 1900, 2000)
+-- 11. 영화의 최고 평점과 최저 평점 차이가 가장 큰 상위 5개 연도
+-- 12. 2시간 미만의 영화를 만들어 본 적이 한 번도 없는 감독
+-- 13. 전체 영화에서 평점이 8.0 이상인 영화의 비율
+-- 14. 평점이 7.0보다 높은 영화가 차지하는 비율이 가장 높은 감독
+-- 15. 길이별로 영화를 분류하고 그룹화하기
+-- 16. flop 여부에 따라 영화를 분류 및 그룹화하기
+
+-- 1. 각 년도에 개봉된 영화의 수
+select
+    release_date,
+    count(*) as cnt
+from movies
+where release_date is not null
+group by release_date;
+
+-- 2. 평균 영화 상영 시간이 가장 높은 최신 10년
+select title, release_date from movies''
+where title is not null AND release_date is not null
+group by release_date
+order by release_date desc
+limit 10;
+
+
+-- 3. 21세기에 개봉한 영화의 평균 평점
+select round(avg(rating), 2) as avg_rating, release_date from movies
+where title is not null AND rating is not null AND release_date is not null AND  release_date >= 2000
+group by rating
+order by release_date desc;
+
+-- or
+-- 21세기 전체 평균
+select avg(rating) from movies where rating is not null AND release_date >= 2000;
+
+-- 4. 평균 영화 상영 시간이 가장 긴 감독
+select director, max(runtime) / 60 as max_runtime from movies;
+
+-- 5. 가장 많은 영화를 작업한 다작 감독 상위 5명
+select director, count(*) as cnt from movies
+where director is not null
+group by director
+order by cnt desc
+limit 5;
+
+-- 6. 각 감독의 최고 평점과 최저 평점
+select director, min(rating) as min_rating, max(rating) as max_rating from movies
+where director is not null AND rating is not null
+group by director
+having count(*) > 5;
+
+-- 7. 돈을 가장 많이 번 감독 (수익에서 예산을 뺀 금액 계산)
+select director,(sum(revenue) - sum(budget)) as get_money from movies
+where director is not null and budget is not null and revenue is not null
+GROUP BY director
+having get_money > 0
+order by get_money desc;
+
+-- 8. 2시간 이상인 영화들의 평균 평점
+select round(avg(rating),0) as avg_runtime from movies
+where rating is not null and runtime >= 120;
+
+-- 9. 가장 많은 영화가 개봉된 년도
+select release_date, count(*) as cnt from movies
+where
+    release_date is not null
+group by release_date
+order by cnt desc
+limit 1;
+
+-- 10. 각 10년동안 평균 영화 상영 시간 (ex: 1800, 1900, 2000)
+select (release_date / 10) * 10 as decad , round(avg(runtime),0) as avg_runtime from movies
+where release_date is not null and runtime is not null
+group by decad
+order by decad desc;
+
+-- 11. 영화의 최고 평점과 최저 평점 차이가 가장 큰 상위 5개 연도
+

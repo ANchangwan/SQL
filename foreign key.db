@@ -1,0 +1,53 @@
+use dogs;
+
+drop table dogs;
+
+create table dogs(
+    dog_id bigint unsigned primary key auto_increment,
+    name varchar(50) not null,
+    weight decimal(5,2),
+    date_of_birth DATE,
+    owner_id bigint unsigned,
+    breeds_id bigint unsigned default 2,
+    foreign key(owner_id) references owners (owner_id) on DELETE set null ,
+    constraint breeds_fk foreign key (breeds_id) references breeds (breeds_id) on delete set default
+);
+
+create table pet_passport(
+    pet_passport_id bigint unsigned primary key auto_increment,
+    blood_type varchar(10),
+    allergies text,
+    dog_id bigint unique,
+    foreign key dog_fk (dog_id) references dogs (dog_id) on delete cascade
+);
+
+delete from owners where owner_id = 2;
+-- on delete
+-- 1. cascade, 만약 owner table이 삭제되면 연쇄 삭제 허용
+-- 2. set null, 만약 연결된 키값이 not null이 아니면 null이 되지 않는다.
+-- 3. default , 만약 연결된 키값이 default 값이 설정 되 있으면 default 값으로 변경
+
+create table owners(
+    owner_id bigint unsigned primary key auto_increment,
+    name varchar(50) not null,
+    phone varchar(20),
+    address tinytext
+);
+
+delete from breeds where breeds_id = 1;
+create table breeds(
+    breeds_id bigint unsigned primary key auto_increment,
+    name varchar(50) not null,
+    size_category ENUM('small','medium','big') default 'small',
+    typical_lifespan tinyint
+);
+
+insert into breeds (name, size_category, typical_lifespan) values ('golden Retriever', 'big', 12);
+
+alter table owners add column email varchar(20);
+insert into owners (name, email, phone, address) values ('changwan','
+ssd@zod.com', '010511231231','Incheon');
+
+insert into dogs (name, weight, date_of_birth, owner_id, breeds_id)
+VALUES ('buddy',10,'2018-03-15',2, 1);
+

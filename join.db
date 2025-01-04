@@ -1,0 +1,149 @@
+
+-- cross join :  모든 행을 가져온다.
+select count(owners.owner_id), count(dogs.dog_id) from dogs cross join owners;
+
+
+-- inner join
+# 어떤 row와 row를 연결시킬지 선택할 수 있다.
+# on 을 사용하여 외래키와 같은 값을 가져올 수 있다.
+# on 대신 using을 사용하여 축약할 수 있다.
+select * from dogs join owners on dogs.owner_id = owners.owner_id;
+
+select dogs.name as dog_name,
+       owners.name as owners_name,
+       breeds.name as bredds_name
+from dogs
+    join owners
+        using (owner_id)
+    join breeds
+        using (breed_id);
+
+# outer join
+# left join : table A 와 table B의 공통 값과 table A 값을 가져온다.
+# right join : table A 와 table B의 공통 값을 가져오고 right table B의 값을 가져온다.
+
+select dogs.name as dog_name,
+       owners.name as owners_name
+from dogs
+right join owners on dogs.owner_id = owners.owner_id;
+
+# join Question
+-- 1.모든 개 종의 이름과 함께  리스트로 출력하기
+select dogs.name
+    as dogs_name,
+    breeds.name
+    as breeds_name
+    from dogs
+join breeds using(breed_id);
+
+-- 2. 모든 주인과 그들의 개를 보여라
+select
+    owners.name as owner_name,
+    dogs.name as dog_name
+    from owners
+join dogs using (owner_id);
+
+-- 3. 모든 종과 그 종의 개들을 보여라
+select
+    breeds.name as breed_name,
+    dogs.name as dogs_name
+    from breeds
+join dogs using (breed_id);
+
+-- 4. 강아지 여권을 가지고 있는 모든 개의 목록 과 주인의 데이터와 정보 목록을 보여라 (만약 이용 가능하다면)
+select
+    dogs.name as dogs_name,
+    owners.name as owner_name,
+    owners.phone as owner_phone
+from dogs
+join pet_passports using (dog_id)
+left join owners using (owner_id);
+
+-- 4. 트릭을 알고 있는 개들과 모든 트릭을 보여라
+select
+    tricks.name as tricks_name,
+    dogs.name as dog_name
+    from tricks
+join dog_tricks using(trick_id)
+join dogs using (dog_id);
+
+
+-- 5. 하나의 재주도 갖고 있지 않은 강아지를 보여라
+select
+    dogs.name as dog_name
+    from dogs
+left join dog_tricks using (dog_id)
+where dog_tricks.dog_id is null;
+
+-- 6. 모든 품종과 품종별 개의 수를 구하라
+select
+    count(*) as dog_cnt,
+    breeds.name as breed_name
+    from breeds
+right join dogs using (breed_id)
+group by breeds.name;
+
+-- 7. 그들 개들의 수와 함께 모든 주인의 보여라
+-- 개 나이의 평균과 평균 무게를 함께 보여라
+
+select
+    owners.name as owner_name,
+    count(dogs.dog_id) as dog_cnt,
+    round(avg(dogs.weight),2) as dog_avg,
+    ROUND(AVG(TIMESTAMPDIFF(YEAR, dogs.date_of_birth, CURDATE())), 2) AS avg_age
+    from owners
+left join dogs using (owner_id)
+group by owners.owner_id; # 이름이 많다면 id를 통해서 그룹핑해야된다.
+
+-- 8. 각가의 트릭을 알고 있는 개들의 수와 모든 개들을 인기순으로 정렬
+select
+    count(*) as cnt_trick,
+    tricks.name as trick_name
+    from tricks
+join dog_tricks using(trick_id)
+group by tricks.trick_id
+order by cnt_trick desc;
+
+-- 9. 개들이 알고 있는 트릭의 수를 모두 보여라
+select
+    count(*) as trick_cnt,
+    dogs.name as dog_name
+    from dogs
+join dog_tricks using (dog_id)
+group by dogs.name
+order by trick_cnt desc;
+
+-- 10. 강아지가 알고 있는 트릭과 그들의 강아지를 목록
+select
+    owners.name as owner_name,
+    tricks.name as trick_name,
+    dogs.name as dog_name
+
+from owners
+join dogs using(owner_id)
+join dog_tricks using (dog_id)
+join tricks using(trick_id);
+
+
+-- 11. 그 품종의 평균 무게와 수명을 보여라
+select
+    breeds.name as dog_name,
+    avg(dogs.weight) as avg_weight,
+    breeds.typical_lifespan as lifespan_avg
+    from breeds
+join dogs using(breed_id)
+group by breeds.breed_id
+order by breeds.typical_lifespan desc;
+
+-- 12. 모든 개들의 가장 최근 건강 검진과 마지막 검진 날짜의 간격
+select
+    dogs.name as dog_name,
+    pet_passports.last_checkup_date,
+    TIMESTAMPDIFF (day,
+            pet_passports.last_checkup_date,curdate())  AS days_since_checkup
+from dogs
+join pet_passports using (dog_id);
+
+
+
+

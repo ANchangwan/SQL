@@ -144,6 +144,39 @@ select
 from dogs
 join pet_passports using (dog_id);
 
+-- 13. 그 종에서 가장 무거운 개의 이름의 모든 종을 보여라
+select
+    breeds.breed_id,
+    breeds.name,
+    dogs.name,
+    dogs.weight
+from breeds
+    join dogs using (breed_id)
+where dogs.weight = (
+    select
+        max(d1.weight)
+    from dogs d1
+    where d1.breed_id = breeds.breed_id
+    );
+
+-- 14. 모든 재주에 대해서 가장 최근에 배웠던 개의 이름과 함께 목록을 작성해라.
+select
+     tricks.name,
+     dogs.name,
+     dog_tricks.date_learned
+from tricks
+         join dog_tricks using (trick_id)
+        join dogs using (dog_id)
+where dog_tricks.date_learned = (
+    select max(dt.date_learned)
+    from dog_tricks dt
+    where dt.trick_id = tricks.trick_id
+    group by dt.trick_id
+    )
+
+
+
+
 
 
 

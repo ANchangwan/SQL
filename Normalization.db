@@ -1,0 +1,37 @@
+create table countries(
+    country_id bigint unsigned primary key auto_increment,
+    country_code char(2) unique not null ,
+    created_at timestamp default current_timestamp not null,
+    updated_at timestamp default current_timestamp on update current_timestamp not null
+);
+
+# insert into countries (country_code)
+select
+    substring_index(country, ',', 1),
+    substring_index(country, ',', -1),
+    country
+    from movies
+where country  like '__,__'
+group by country;
+
+-- substring_index : 문자열을 분리시키는 함수
+-- substring_index('co,mx', ',', 1 or -1) : 1 이면 앞쪽 co, -1 이면 mx
+
+insert ignore into countries (country_code)
+select
+    substring_index(country, ',', 1)
+from movies
+where country  like '__,__'
+group by country
+union
+select
+    substring_index(country, ',', -1)
+from movies
+where country  like '__,__'
+group by country
+union
+select
+    substring_index(substring_index(country,',' ,2), ',', -1)
+from movies
+where country like '__,__,__'
+group by country;
